@@ -6,6 +6,25 @@ import {
 } from "./downloader.js";
 import path from "path";
 import cors from "cors";
+import fs from "fs";
+import axios from "axios";
+
+function downloadThumbnail(url, path) {
+  return new Promise((res, rej) => {
+    axios({
+      url,
+      method: "GET",
+      responseType: "stream",
+    })
+      .then(response => {
+        response.data.pipe(fs.createWriteStream(path));
+        response.data.on("end", () => {
+          res(path);
+        });
+      })
+      .catch(err => rej(err));
+  });
+}
 
 const app = express();
 app.use(cors());
@@ -21,15 +40,25 @@ app.post("/video", async (req, res) => {
     return res.status(400).send("Please send video url!");
   }
   const videoInfo = await getVideoInfromation(video_url);
+  const isInstagram = video_url.startsWith("https://www.instagram.com");
+  let thumb = videoInfo.thumbnail;
+  if (isInstagram) {
+    const url = videoInfo.thumbnail;
+    const path = videoInfo.title + ".jpg";
+    await downloadThumbnail(url, path);
+    thumb = `http://localhost:8080/image/${path}`;
+  }
   res.send({
     title: videoInfo.title,
-    thumbnail: videoInfo.thumbnail,
+    thumbnail: thumb,
     uploader: videoInfo.uploader,
     duration: videoInfo.duration,
     availableResolutions: youtubeVideoFormats
       .map(format => {
         const info = videoInfo.formats.find(
-          f => f.resolution === format.resolution
+          f =>
+            f.resolution === format.resolution ||
+            f.resolution.split("x").reverse().join("x") === format.resolution
         );
 
         return {
@@ -47,11 +76,29 @@ app.post("/download", async (req, res) => {
   const video_url = req.body.video_url;
   await downloadVideo(youtube_url, video_url);
   const videoPath = path.resolve("video.mp4");
+
   res.download(videoPath, "video.mp4", err => {
     if (err) {
       console.error(err);
       res.status(500).send("File not found");
     }
+    fs.unlink("video.mp4", err => {
+      if (err) {
+        console.log(err);
+      }
+    });
+    fs.unlink("audio.m4a", err => {
+      if (err) {
+        console.log(err);
+      }
+    });
+  });
+});
+
+app.get("/image/:slug", (req, res) => {
+  const slug = req.params.slug;
+  res.download(slug, err => {
+    console.log("error", err);
   });
 });
 

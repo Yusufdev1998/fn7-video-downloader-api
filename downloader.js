@@ -6,9 +6,9 @@ export async function getVideoInfromation(url) {
   const json = await youtubedl(url, {
     dumpSingleJson: true,
   });
-  // fs.writeFile("data.json", JSON.stringify(json, null, 2), err => {
-  //   console.log(err);
-  // });
+  fs.writeFile("data.json", JSON.stringify(json, null, 2), err => {
+    console.log(err);
+  });
   return json;
 }
 
