@@ -1,14 +1,14 @@
 import youtubedl from "youtube-dl-exec";
 import Ffmpeg from "fluent-ffmpeg";
-import fs from "fs";
 
 export async function getVideoInfromation(url) {
   const json = await youtubedl(url, {
     dumpSingleJson: true,
   });
-  fs.writeFile("data.json", JSON.stringify(json, null, 2), err => {
-    console.log(err);
-  });
+  // for debugging video info
+  // fs.writeFile("data.json", JSON.stringify(json, null, 2), err => {
+  //   console.log(err);
+  // });
   return json;
 }
 
@@ -48,32 +48,64 @@ export const youtubeVideoFormats = [
     resolution: "256x144",
   },
   {
+    name: "144p",
+    resolution: "256x136",
+  },
+  {
     name: "240p",
     resolution: "426x240",
+  },
+  {
+    name: "240p",
+    resolution: "426x224",
   },
   {
     name: "360p",
     resolution: "640x360",
   },
   {
+    name: "360p",
+    resolution: "640x338",
+  },
+  {
     name: "480p",
     resolution: "854x480",
+  },
+  {
+    name: "480p",
+    resolution: "854x450",
   },
   {
     name: "720p (HD)",
     resolution: "1280x720",
   },
   {
+    name: "720p (HD)",
+    resolution: "1280x676",
+  },
+  {
     name: "1080p (Full HD)",
     resolution: "1920x1080",
+  },
+  {
+    name: "1080p (Full HD)",
+    resolution: "1920x1012",
   },
   {
     name: "1440p (2K)",
     resolution: "2560x1440",
   },
   {
+    name: "1440p (2K)",
+    resolution: "2560x1350",
+  },
+  {
     name: "2160p (4K)",
     resolution: "3840x2160",
+  },
+  {
+    name: "2160p (4K)",
+    resolution: "3840x2026",
   },
   {
     name: "4320p (8K)",

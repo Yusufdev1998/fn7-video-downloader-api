@@ -20,6 +20,7 @@ function downloadThumbnail(url, path) {
         response.data.pipe(fs.createWriteStream(path));
         response.data.on("end", () => {
           res(path);
+          console.log("downloaded");
         });
       })
       .catch(err => rej(err));
@@ -29,6 +30,8 @@ function downloadThumbnail(url, path) {
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+app.use("/public", express.static("./public"));
 app.get("/", (req, res) => {
   res.send("Server is up and running");
 });
@@ -44,9 +47,9 @@ app.post("/video", async (req, res) => {
   let thumb = videoInfo.thumbnail;
   if (isInstagram) {
     const url = videoInfo.thumbnail;
-    const path = videoInfo.title + ".jpg";
+    const path = "./public/" + videoInfo.title + ".jpg";
     await downloadThumbnail(url, path);
-    thumb = `http://localhost:8080/image/${path}`;
+    thumb = `http://localhost:8080/${path.slice(2)}`;
   }
   res.send({
     title: videoInfo.title,
@@ -92,13 +95,6 @@ app.post("/download", async (req, res) => {
         console.log(err);
       }
     });
-  });
-});
-
-app.get("/image/:slug", (req, res) => {
-  const slug = req.params.slug;
-  res.download(slug, err => {
-    console.log("error", err);
   });
 });
 
